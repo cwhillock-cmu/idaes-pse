@@ -22,6 +22,14 @@ Costing package based on methods from:
 Currently, this costing package only includes methods for capital costing of
 unit operations.
 """
+
+"""
+CO2_EOR copy file
+CHANGES FOR co2_eor
+used safe_log in compressor and vessel costing calcs
+used a tolerance for the power function in costing platforms and ladders
+
+"""
 # TODO: Missing docstrings
 # pylint: disable=missing-class-docstring
 
@@ -49,6 +57,8 @@ from idaes.core.util.exceptions import ConfigurationError
 from idaes.core.util.constants import Constants
 from idaes.core.util.math import smooth_max
 from idaes.core.util.misc import StrEnum
+
+from idaes.core.util.math import smooth_abs, safe_log
 
 from idaes.core import (
     FlowsheetCostingBlockData,
@@ -611,8 +621,8 @@ class SSLWCostingData(FlowsheetCostingBlockData):
             return blk.base_cost_per_unit == (
                 pyo.exp(
                     alpha[1]
-                    + alpha[2] * (pyo.log(blk.weight / pyo.units.pound))
-                    + alpha[3] * (pyo.log(blk.weight / pyo.units.pound) ** 2)
+                    + alpha[2] * (safe_log(blk.weight / pyo.units.pound))
+                    + alpha[3] * (safe_log(blk.weight / pyo.units.pound) ** 2)
                 )
                 * pyo.units.USD_CE500
             )
@@ -669,7 +679,7 @@ class SSLWCostingData(FlowsheetCostingBlockData):
             @blk.Constraint()
             def cost_platforms_ladders_eq(blk):
                 return blk.base_cost_platforms_ladders == (
-                    2005 * (D / pyo.units.foot) ** 0.20294 * pyo.units.USD_CE500
+                    2005 * (D / pyo.units.foot+1e-4) ** 0.20294 * pyo.units.USD_CE500
                 )
 
         else:
@@ -1086,7 +1096,7 @@ class SSLWCostingData(FlowsheetCostingBlockData):
         @blk.Constraint()
         def base_cost_per_unit_eq(blk):
             return blk.base_cost_per_unit == (
-                pyo.exp(alpha[1] + alpha[2] * pyo.log(work_hp / pyo.units.hp))
+                pyo.exp(alpha[1] + alpha[2] * safe_log(work_hp / pyo.units.hp))
                 * pyo.units.USD_CE500
             )
 

@@ -12,6 +12,9 @@
 #################################################################################
 """
 Framework for generic property packages
+
+modifications:
+added enth_mass
 """
 # TODO: Pylint complains about variables with _x names as they are built by sub-classes
 # pylint: disable=protected-access
@@ -1838,6 +1841,7 @@ class GenericParameterData(PhysicalParameterBlock):
                     "method": "_energy_internal_mol_phase_comp"
                 },
                 "enth_mol": {"method": "_enth_mol"},
+                "enth_mass": {"method": "_enth_mass"},
                 "enth_mol_phase": {"method": "_enth_mol_phase"},
                 "enth_mol_phase_comp": {"method": "_enth_mol_phase_comp"},
                 "entr_mol": {"method": "_entr_mol"},
@@ -3994,6 +3998,17 @@ class GenericStateBlockData(StateBlockData):
             self.enth_mol = Expression(rule=rule_enth_mol, doc="Mixture molar enthalpy")
         except AttributeError:
             self.del_component(self.enth_mol)
+            raise
+
+    def _enth_mass(self):
+        try:
+
+            def rule_enth_mass(b):
+                return b.enth_mol * b.mw
+
+            self.enth_mass = Expression(rule=rule_enth_mass, doc="Mixture mass enthalpy")
+        except AttributeError:
+            self.del_component(self.enth_mass)
             raise
 
     def _enth_mol_phase(self):
