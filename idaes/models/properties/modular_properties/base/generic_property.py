@@ -13,8 +13,9 @@
 """
 Framework for generic property packages
 
-modifications:
+modifications for co2_eor:
 added enth_mass
+tweaked viscosity method
 """
 # TODO: Pylint complains about variables with _x names as they are built by sub-classes
 # pylint: disable=protected-access
