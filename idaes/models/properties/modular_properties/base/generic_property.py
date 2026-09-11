@@ -1974,6 +1974,7 @@ class GenericParameterData(PhysicalParameterBlock):
                     "method": "_energy_internal_mol_phase_comp"
                 },
                 "enth_mol": {"method": "_enth_mol"},
+                "enth_mass": {"method": "_enth_mass"},
                 "enth_mol_phase": {"method": "_enth_mol_phase"},
                 "enth_mol_phase_comp": {"method": "_enth_mol_phase_comp"},
                 "entr_mol": {"method": "_entr_mol"},
@@ -2706,7 +2707,9 @@ class _GenericStateBlock(StateBlock):
                     # Initialize critical point properties
                     _initialize_critical_props(k)
                     # Add critical point constraints to cons_list
-                    cons_list += k.list_critical_property_constraint_names()
+                    ref_phase = k._get_critical_ref_phase()
+                    p_config = k.params.get_phase(ref_phase).config
+                    cons_list += p_config.equation_of_state.list_critical_property_constraint_names()
 
             # Bubble temperature initialization
             if hasattr(k, "_mole_frac_tbub"):
@@ -4135,6 +4138,17 @@ class GenericStateBlockData(StateBlockData):
             self.enth_mol = Expression(rule=rule_enth_mol, doc="Mixture molar enthalpy")
         except AttributeError:
             self.del_component(self.enth_mol)
+            raise
+
+    def _enth_mass(self):
+        try:
+
+            def rule_enth_mass(b):
+                return b.enth_mol * b.mw
+
+            self.enth_mass = Expression(rule=rule_enth_mass, doc="Mixture mass enthalpy")
+        except AttributeError:
+            self.del_component(self.enth_mass)
             raise
 
     def _enth_mol_phase(self):
