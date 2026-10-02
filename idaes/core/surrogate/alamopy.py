@@ -115,6 +115,7 @@ supported_options = [
     "GAMSSOLVER",
     "solvemip",
     "print_to_screen",
+    "ZMIN",
 ]
 
 """
@@ -451,6 +452,15 @@ class AlamoTrainer(SurrogateTrainer):
             "variables. One per output variable, space separated. A 0 signals "
             "that no limit is imposed.",
         ),
+    )
+    CONFIG.declare(
+        "ZMIN",
+        ConfigValue(
+            default=None,
+            domain=ListOf(float),
+            description="List of minimum values for outputs",
+            doc="Row vector of minimum values for output variables. One per output variable, space separated."
+        )
     )
     CONFIG.declare(
         "numlimitbasis",
