@@ -12,6 +12,8 @@
 #################################################################################
 """
 Python interface for ALAMO tool.
+changes for co2_eor:
+    added various options
 """
 
 from enum import Enum
@@ -116,6 +118,11 @@ supported_options = [
     "solvemip",
     "print_to_screen",
     "ZMIN",
+    "ZMAX",
+    "EXTRAPXMIN",
+    "EXTRAPXMAX",
+    "CRROBUST",
+    "CRMAXITER",
 ]
 
 """
@@ -463,6 +470,53 @@ class AlamoTrainer(SurrogateTrainer):
         )
     )
     CONFIG.declare(
+        "ZMAX",
+        ConfigValue(
+            default=None,
+            domain=ListOf(float),
+            description="List of maximum values for outputs",
+            doc="Row vector of maximum values for output variables. One per output variable, space separated."
+        )
+    )
+    CONFIG.declare(
+        "EXTRAPXMIN",
+        ConfigValue(
+            default=None,
+            domain=ListOf(float),
+            description="List of minimum values for input for constrained regression extrapolation",
+            doc="Row vector of minimum values for input variables. One per input variable, space separated."
+        )
+    )
+    CONFIG.declare(
+        "EXTRAPXMAX",
+        ConfigValue(
+            default=None,
+            domain=ListOf(float),
+            description="List of maximum values for input for constrained regression extrapolation",
+            doc="Row vector of maximum values for input variables. One per input variable, space separated."
+        )
+    )
+    CONFIG.declare(
+        "CRROBUST",
+        ConfigValue(
+            default=True,
+            domain=Bool,
+            description="Whether to use global optimizer for constrained regression",
+            doc="If 1, the search for constraint violations is carried out by the global optimizer"
+            "which certifies that a model reported as feasible has no violation anywhere in the domain."
+            " If 0, the search is limited to the sampled trial points and no such certificate is obtained.."
+        )
+    )
+    CONFIG.declare(
+        "CRMAXITER",
+        ConfigValue(
+            default=10,
+            domain=int,
+            description="Maximum allowed constrained regression iterations",
+            doc="Constraints are enforced on additional points during each iteration. CRMAXITER must be a nonnegative integer; 0 enforces the constraints only on the initial point set"
+        )
+    )
+    CONFIG.declare(
         "numlimitbasis",
         ConfigValue(
             default=True,  # default this to true to avoid numerical issues
@@ -669,6 +723,7 @@ class AlamoTrainer(SurrogateTrainer):
             description="Flag indicating whether existing files can be " "overwritten.",
         ),
     )
+
 
     # TODO: We need to do some processing of the labels since ALAMO is
     # restrictive about the labels
