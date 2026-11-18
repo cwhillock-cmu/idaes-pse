@@ -31,6 +31,7 @@ from pyomo.environ import (
     Var,
     units as pyunits,
     Reference,
+    NonNegativeReals,
 )
 from pyomo.common.config import ConfigBlock, ConfigDict, ConfigValue, In, Bool
 from pyomo.util.calc_var_value import calculate_variable_from_constraint
@@ -3625,11 +3626,17 @@ class GenericStateBlockData(StateBlockData):
             self.pressure_crit = Var(
                 doc="Critical pressure of mixture",
                 units=base_units.PRESSURE,
+                domain=NonNegativeReals,
+                bounds=(1e-4,None),
+                initialize=50*100000,
             )
 
             self.temperature_crit = Var(
                 doc="Critical temperature of mixture",
                 units=base_units.TEMPERATURE,
+                domain=NonNegativeReals,
+                bounds=(1e-4,None),
+                initialize=300,
             )
 
             p_config = self.params.get_phase(ref_phase).config
